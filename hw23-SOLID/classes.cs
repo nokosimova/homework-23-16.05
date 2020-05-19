@@ -9,37 +9,96 @@ namespace hw23_SOLID
     
     public class Drink
     {
-        public int id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
+        public Drink(int id, string name, decimal price)
+        {
+            this.Id = id;
+            this.Name = name;
+            this.Price = price;
+        }
     }
     public class CoffeeShop
     {
         public static List<Drink> menu = new List<Drink>();
+        public IShowMenu show { get; set; }
+        public ITakeAnOrder take { get; set; }
+        public ITakePayment getpay { get; set; }
+        public ICookDrink cook { get; set; }
+        public IChangeMenu change { get; set; }
+
+        public void ChangeMenuList()
+        {
+            Console.Write("Choose actions:\n1 - Add new drink \n2 - Change price");
+            int command = int.Parse(Console.ReadLine());
+            switch(command)
+            {
+                case 1:
+                    change.AddNewDrink();
+                    break;
+                case 2:
+                    change.ChangePrice();
+                    break;
+            }
+        }
+
         public void SurviveClient() //обслужить клиента
         {
+            show.ShowMenu();
+
         }
     }
-    interface IShowMenu
+    public interface IChangeMenu
     {
-        void ShowMenu(List<Drink> menu);
+        void AddNewDrink();
+        void ChangePrice();
+    }
+    class ExpandMenu: MenuForm, IChangeMenu
+    {
+        public void AddNewDrink()
+        {
+            Console.Write ("Name: ");
+            string name = Console.ReadLine();
+            Console.Write("Price (x.yy): ");
+            decimal price = decimal.Parse(Console.ReadLine());
+            CoffeeShop.menu.Add(new Drink(++Program.idCounter, name, price));
+        }
+        public void ChangePrice()
+        {
+            ShowMenu();
+            Console.Write("Choose drink id: ");
+            int id = int.Parse(Console.ReadLine());
+            var index = CoffeeShop.menu.FindIndex(i => i.Id == id);
+
+            Console.Write("New price: ");
+            decimal newPrice = decimal.Parse(Console.ReadLine()); 
+            CoffeeShop.menu[index].Price = newPrice;
+
+            Console.WriteLine($"{CoffeeShop.menu[index].Name} price was changed!");
+        }
+
+    }
+    public interface IShowMenu
+    {
+        void ShowMenu();
     }
     
-    interface ITakeAnOrder //принять заказ
+    public interface ITakeAnOrder //принять заказ
     {
         
         List<Drink> GetAnOrderList();
     }
     class MenuForm: IShowMenu
     {
-        public void ShowMenu(List<Drink> menu)
+        public void ShowMenu()
         {
             Console.BackgroundColor = ConsoleColor.Blue;
             Console.ResetColor();
             Console.WriteLine("        MENU       ");
             Console.WriteLine("----------------------");
-            foreach (var i in menu)
-                Console.WriteLine($"{i.id}. {i.Name} - {i.Price} somoni");
+            foreach (var i in CoffeeShop.menu)
+                Console.WriteLine($"{i.Id}. {i.Name} - {i.Price} somoni");
         }
     }
     class TakeAnOrder : MenuForm, ITakeAnOrder
@@ -49,12 +108,12 @@ namespace hw23_SOLID
             bool act = true;
             List<Drink> orderedDrinks = new List<Drink>();
             while(act)
-            {
+            {                
+                ShowMenu();
                 Console.WriteLine("Choose one drink id");
-                ShowMenu(CoffeeShop.menu);
                 Console.Write("Answer: ");
                 int id = int.Parse(Console.ReadLine());
-                var newDrink = CoffeeShop.menu.Where(i => i.id == id).Last();
+                var newDrink = CoffeeShop.menu.Where(i => i.Id == id).Last();
                 orderedDrinks.Add(newDrink);
                 Console.WriteLine("Any other drinks ?Y(yes)/N(no)");
                 string ans = Console.ReadLine();
@@ -68,7 +127,7 @@ namespace hw23_SOLID
         }
                          
     }
-    interface ICookDrink //Приготовить напитки
+    public interface ICookDrink //Приготовить напитки
     {
         void CookAll(List<Drink> drinks);
     }
@@ -90,7 +149,7 @@ namespace hw23_SOLID
             Console.WriteLine("All drinks are ready!");
         }
     }
-    interface ITakePayment //принять оплату
+    public interface ITakePayment //принять оплату
     {
         void CalculateCheck(List<Drink> drinks);             
     }
