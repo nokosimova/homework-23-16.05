@@ -22,31 +22,67 @@ namespace hw23_SOLID
     public class CoffeeShop
     {
         public static List<Drink> menu = new List<Drink>();
-        public IShowMenu show { get; set; }
+    /*    public IShowMenu show { get; set; }
         public ITakeAnOrder take { get; set; }
         public ITakePayment getpay { get; set; }
         public ICookDrink cook { get; set; }
-        public IChangeMenu change { get; set; }
+        public IChangeMenu change { get; set; }*/
+        public CoffeeShop()
+        {
+            menu.Add(new Drink(++Program.idCounter, "Classic", 5));
+            menu.Add(new Drink(++Program.idCounter, "Limon tea", 6));
+            menu.Add(new Drink(++Program.idCounter, "Capuchino", 10));
+        }
 
         public void ChangeMenuList()
         {
-            Console.Write("Choose actions:\n1 - Add new drink \n2 - Change price");
-            int command = int.Parse(Console.ReadLine());
-            switch(command)
+            bool act = true;
+            while (act)
             {
-                case 1:
-                    change.AddNewDrink();
-                    break;
-                case 2:
-                    change.ChangePrice();
-                    break;
+                Console.Clear();
+                Console.WriteLine("Choose actions:\n0 - Show menu\n1 - Add new drink \n2 - Change price\n3 - Exit");
+                int command = int.Parse(Console.ReadLine());
+                ExpandMenu expand = new ExpandMenu();
+                MenuForm menu = new MenuForm();
+                switch (command)
+                { 
+                    case 0:
+                        menu.ShowMenu();
+                        Console.WriteLine("Press enter to continue...");
+                        Console.ReadKey();
+                        break;
+                    case 1:
+                        expand.AddNewDrink();
+                        Console.WriteLine("Press enter to continue...");
+                        Console.ReadKey();
+                        break;
+                    case 2:
+                        expand.ChangePrice();
+                        Console.WriteLine("Press enter to continue...");
+                        Console.ReadKey();
+                        break;
+                    case 3:
+                        act = false;
+                        break;
+                    default:
+                        Console.WriteLine("Incorrect command!");
+                        break;
+                }
             }
         }
 
         public void SurviveClient() //обслужить клиента
         {
+            MenuForm show = new MenuForm();
+            TakeAnOrder take = new TakeAnOrder();
+            Payment getPay = new Payment();
+            CookDrinks cook = new CookDrinks();
             show.ShowMenu();
-
+            List<Drink> newOrder =  take.GetAnOrderList();
+            cook.CookAll(newOrder);
+            getPay.CalculateCheck(newOrder);
+            Console.WriteLine("Press enter to continue...");
+            Console.ReadKey();
         }
     }
     public interface IChangeMenu
@@ -54,15 +90,17 @@ namespace hw23_SOLID
         void AddNewDrink();
         void ChangePrice();
     }
-    class ExpandMenu: MenuForm, IChangeMenu
+    public class ExpandMenu: MenuForm, IChangeMenu
     {
         public void AddNewDrink()
         {
             Console.Write ("Name: ");
             string name = Console.ReadLine();
-            Console.Write("Price (x.yy): ");
+            Console.Write("Price (x,yy): ");
             decimal price = decimal.Parse(Console.ReadLine());
             CoffeeShop.menu.Add(new Drink(++Program.idCounter, name, price));
+            Console.WriteLine("New drink was succesfully added");
+            Thread.Sleep(1000);
         }
         public void ChangePrice()
         {
@@ -76,6 +114,7 @@ namespace hw23_SOLID
             CoffeeShop.menu[index].Price = newPrice;
 
             Console.WriteLine($"{CoffeeShop.menu[index].Name} price was changed!");
+            Thread.Sleep(1200);
         }
 
     }
@@ -89,7 +128,7 @@ namespace hw23_SOLID
         
         List<Drink> GetAnOrderList();
     }
-    class MenuForm: IShowMenu
+    public class MenuForm: IShowMenu
     {
         public void ShowMenu()
         {
@@ -101,7 +140,7 @@ namespace hw23_SOLID
                 Console.WriteLine($"{i.Id}. {i.Name} - {i.Price} somoni");
         }
     }
-    class TakeAnOrder : MenuForm, ITakeAnOrder
+    public class TakeAnOrder : MenuForm, ITakeAnOrder
     {
         public List<Drink> GetAnOrderList()
         {
@@ -109,7 +148,7 @@ namespace hw23_SOLID
             List<Drink> orderedDrinks = new List<Drink>();
             while(act)
             {                
-                ShowMenu();
+                
                 Console.WriteLine("Choose one drink id");
                 Console.Write("Answer: ");
                 int id = int.Parse(Console.ReadLine());
@@ -117,7 +156,7 @@ namespace hw23_SOLID
                 orderedDrinks.Add(newDrink);
                 Console.WriteLine("Any other drinks ?Y(yes)/N(no)");
                 string ans = Console.ReadLine();
-                if (ans == "Y")
+                if (ans != "Y")
                 {
                     act = false;
                     Console.WriteLine("Thank you, your order was accepted!");
@@ -131,14 +170,14 @@ namespace hw23_SOLID
     {
         void CookAll(List<Drink> drinks);
     }
-    class CookDrinks : ICookDrink
+    public class CookDrinks : ICookDrink
     {
         public void CookAll(List<Drink> drinks)
         {
             foreach (var i in drinks)
             {
                 Console.Write($"{i.Name} is cooking  ... ");
-                Thread.Sleep(900);
+                Thread.Sleep(3000);
                 Console.BackgroundColor = ConsoleColor.Green;
                 Console.ResetColor();
                 Console.WriteLine($"  {i.Name} is ready!");
@@ -153,7 +192,7 @@ namespace hw23_SOLID
     {
         void CalculateCheck(List<Drink> drinks);             
     }
-    class Payment: ITakePayment
+    public class Payment: ITakePayment
     {
         public void CalculateCheck(List<Drink> drinks)
         {
