@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Threading;
 
 namespace hw23_SOLID
 {
@@ -69,10 +70,46 @@ namespace hw23_SOLID
     }
     interface ICookDrink //Приготовить напитки
     {
-        void CookDrinks(List<Drink> drinks);
+        void CookAll(List<Drink> drinks);
+    }
+    class CookDrinks : ICookDrink
+    {
+        public void CookAll(List<Drink> drinks)
+        {
+            foreach (var i in drinks)
+            {
+                Console.Write($"{i.Name} is cooking  ... ");
+                Thread.Sleep(900);
+                Console.BackgroundColor = ConsoleColor.Green;
+                Console.ResetColor();
+                Console.WriteLine($"  {i.Name} is ready!");
+                Console.BackgroundColor = ConsoleColor.Blue;
+                Console.ResetColor();
+            }
+            Console.WriteLine("--------------------");
+            Console.WriteLine("All drinks are ready!");
+        }
     }
     interface ITakePayment //принять оплату
     {
-        void CalculateCheck(List<Drink> drinks);
+        void CalculateCheck(List<Drink> drinks);             
+    }
+    class Payment: ITakePayment
+    {
+        public void CalculateCheck(List<Drink> drinks)
+        {
+            decimal sum = 0;
+            string time = DateTime.Now.ToString();
+            Console.BackgroundColor = ConsoleColor.DarkMagenta;
+            Console.ResetColor();
+            Console.WriteLine("--------------------------");
+            Console.WriteLine($"-----{time}-------");
+            foreach (var i in drinks)
+            {
+                sum = sum + i.Price;
+                Console.WriteLine($"{i.Name}----------{i.Price}");
+            }
+            Console.WriteLine($"SUM :  {sum} somoni");
+        }
     }
 }
